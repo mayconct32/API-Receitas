@@ -11,11 +11,7 @@ class User(BaseModel):
     email: str
 
 #fake db
-users = [
-        {"username":"user1","email":"user1@example.com"},
-        {"username":"user2","email":"user2@example.com"},
-        {"username":"user3","email":"user3@example.com"}
-    ]
+users:list[User] = []
 
 @app.get("/",status_code = HTTPStatus.OK)
 def get_users():
@@ -23,12 +19,7 @@ def get_users():
 
 @app.post("/",status_code = HTTPStatus.CREATED)
 def add_user(user:User):
-    users.append(
-        {
-            "username":user.username,
-            "email":user.email
-        }
-    )
+    users.append(user)
     return {"message":"User added successfully."}
 
 @app.delete("/",status_code = HTTPStatus.OK)

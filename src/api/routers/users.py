@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,HTTPException
 from pydantic import BaseModel
 from http import HTTPStatus
 
@@ -31,4 +31,14 @@ def add_user(user:User):
     )
 
     return {"message":"User added successfully."}
+
+@app.delete("/",status_code = HTTPStatus.OK)
+def delete_user(posiçao:int):
+    if posiçao>len(users) - 1:
+        raise HTTPException(
+            detail = "usuario não encontrado!",
+            status_code = HTTPStatus.NOT_FOUND
+        )
+    users.pop(posiçao)
+    return {"message":"User deleted successfully."}
 

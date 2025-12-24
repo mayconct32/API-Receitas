@@ -11,7 +11,7 @@ class User(BaseModel):
     email: str
 
 #fake db
-users:list[User] = []
+users = []
 
 @app.get("/",status_code = HTTPStatus.OK)
 def get_users():

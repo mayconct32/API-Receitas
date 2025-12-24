@@ -29,7 +29,6 @@ def add_user(user:User):
             "email":user.email
         }
     )
-
     return {"message":"User added successfully."}
 
 @app.delete("/",status_code = HTTPStatus.OK)
@@ -41,4 +40,14 @@ def delete_user(posiçao:int):
         )
     users.pop(posiçao)
     return {"message":"User deleted successfully."}
+
+@app.put("/",status_code = HTTPStatus.OK)
+def update_user(posiçao:int,user:User):
+    if posiçao>len(users) - 1:
+        raise HTTPException(
+            detail = "usuario não encontrado!",
+            status_code = HTTPStatus.NOT_FOUND
+        )
+    users[posiçao] = user
+    return user 
 

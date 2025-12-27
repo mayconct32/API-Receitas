@@ -3,21 +3,21 @@ from pydantic import BaseModel
 from http import HTTPStatus
 
 
-app = APIRouter(tags=["users"],prefix="/users")
+app = APIRouter(tags=["chefs"],prefix="/chefs")
 
 @app.get("/",status_code = HTTPStatus.OK)
-def get_users():
+def get_chefs():
     ...
 
 @app.post("/",status_code = HTTPStatus.CREATED)
-def add_user(user):
+def add_chefs(user):
     ...
 
 @app.delete("/",status_code = HTTPStatus.OK)
-def delete_user(posiçao:int):
+def delete_chefs(posiçao:int):
     ...
 
 @app.put("/",status_code = HTTPStatus.OK)
-def update_user(posiçao:int,user):
+def update_chefs(posiçao:int,user):
     ...
 

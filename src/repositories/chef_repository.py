@@ -19,4 +19,18 @@ class ChefRepository(IRepository[dict]):
         """
         )
         return chefs
+
+    async def get(self, id: int) -> dict:
+        chef = await self.connection._query(
+        """
+            SELECT id,
+                chef_name,
+                email
+            FROM chef
+            WHERE id = %s
+        """,(id,)
+        )
+        return chef
+        
+
             

@@ -43,6 +43,12 @@ class ChefRepository(IRepository[dict]):
             VALUES (%s,%s,%s);
         """,data
         )
-        
+    
+    async def delete(self, id: int) -> None:
+        await self.connection._query(
+        """
+            DELETE FROM chef WHERE id = %s;
+        """,(id,)
+        )
 
             

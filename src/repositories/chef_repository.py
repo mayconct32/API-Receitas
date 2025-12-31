@@ -31,6 +31,18 @@ class ChefRepository(IRepository[dict]):
         """,(id,)
         )
         return chef
+    
+    async def add(self, data: tuple) -> None:
+        await self.connection._query(
+        """
+            INSERT INTO chef(
+                chef_name,
+                email,
+                password_hash
+            )
+            VALUES (%s,%s,%s);
+        """,data
+        )
         
 
             

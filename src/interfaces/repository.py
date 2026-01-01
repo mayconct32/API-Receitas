@@ -21,5 +21,5 @@ class IRepository[T](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, id: int, **kwargs: object) -> None:
+    def update(self, **kwargs: object) -> None:
         raise NotImplementedError

@@ -50,5 +50,17 @@ class ChefRepository(IRepository[dict]):
             DELETE FROM chef WHERE id = %s;
         """,(id,)
         )
+    
+    async def update(self, data: tuple) -> None:
+        await self.connection._query(
+        """
+            UPDATE chef SET
+                chef_name = %s,
+                email = %s,
+                password_hash = %s
+            WHERE id = %s;
+        """,data
+        )
+    
 
             

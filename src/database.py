@@ -1,11 +1,12 @@
 import os 
 from mysql.connector.aio import connect
+from src.interfaces.connection_db import IConnectionDB
 from dotenv import load_dotenv
 
 
 load_dotenv()
 
-class MysqlConnection:
+class MysqlConnectionDB(IConnectionDB):
 
     def __init__(self):
         self._host = os.getenv('HOST')
@@ -22,17 +23,17 @@ class MysqlConnection:
             database = self._database
         )
     
-    async def _query(
+    async def execute(
         self,
-        query:str,
+        sql:str,
         data=None
     ):
         if not self.conn:
             self.conn = await self._connection()
         async with await self.conn.cursor(dictionary=True) as cursor:
-            await cursor.execute(query,data)
+            await cursor.execute(sql,data)
             response = await cursor.fetchall()
-            if query.split()[0] in ["UPDATE","INSERT"]:
+            if sql.split()[0] in ["UPDATE","INSERT"]:
                 await self.conn.commit()
             return response
 

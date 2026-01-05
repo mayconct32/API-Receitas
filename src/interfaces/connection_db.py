@@ -1,15 +1,14 @@
 from abc import ABC,abstractmethod
-from typing import Any
 
 
 class IConnectionDB(ABC):
 
     @abstractmethod
-    def _connection(self) -> Any:
+    def _connection(self):
         raise NotImplementedError
     
     @abstractmethod
-    async def execute(self,sql:str,data: object=None) -> Any:
+    def execute(self, sql: str = None, data: object = None):
         raise NotImplementedError
 
 

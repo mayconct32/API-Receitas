@@ -8,7 +8,7 @@ class IConnectionDB(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def execute(self, sql: str = None, data: object = None):
+    def execute(self, **kwargs: object):
         raise NotImplementedError
 
 

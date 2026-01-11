@@ -11,9 +11,11 @@ class ChefRepository(IRepository[dict]):
     async def get_all(self) -> List[dict]:
         chefs = await self.connection.execute(
         """
-            SELECT id,
+            SELECT chef_id,
                 chef_name,
-                email
+                email,
+                create_at,
+                updated_at
             FROM chef
             LIMIT 20;
         """
@@ -23,11 +25,12 @@ class ChefRepository(IRepository[dict]):
     async def get(self, id: int) -> dict:
         chef = await self.connection.execute(
         """
-            SELECT id,
+            SELECT chef_id,
                 chef_name,
-                email
-            FROM chef
-            WHERE id = %s
+                email,
+                create_at,
+                updated_at
+            WHERE chef_id = %s
         """,(id,)
         )
         return chef
@@ -38,27 +41,29 @@ class ChefRepository(IRepository[dict]):
             INSERT INTO chef(
                 chef_name,
                 email,
-                password_hash
+                password_hash,
+                create_at,
+                updated_at
             )
-            VALUES (%s,%s,%s);
+            VALUES (%s,%s,%s,%s,%s);
         """,data
         )
     
     async def delete(self, id: int) -> None:
         await self.connection.execute(
         """
-            DELETE FROM chef WHERE id = %s;
+            DELETE FROM chef WHERE chef_id = %s;
         """,(id,)
         )
     
     async def update(self, data: tuple) -> None:
-        await self.connection._execute(
+        await self.connection.execute(
         """
             UPDATE chef SET
                 chef_name = %s,
                 email = %s,
                 password_hash = %s
-            WHERE id = %s;
+            WHERE chef_id = %s;
         """,data
         )
     

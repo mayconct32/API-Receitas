@@ -11,8 +11,8 @@ ChefServiceDep = Annotated[ChefService, Depends(get_chef_service)]
 app = APIRouter(tags=["chefs"],prefix="/chefs")
 
 @app.get("/",status_code = HTTPStatus.OK)
-def get_chefs(chef_service: ChefServiceDep):
-    ...
+async def get_chefs(chef_service: ChefServiceDep):
+    return await chef_service.get_all_the_chefs()
 
 @app.post("/",status_code = HTTPStatus.CREATED)
 def add_chefs(user,chef_service: ChefServiceDep):

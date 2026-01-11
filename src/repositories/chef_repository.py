@@ -30,6 +30,7 @@ class ChefRepository(IRepository[dict]):
                 email,
                 create_at,
                 updated_at
+            FROM chef
             WHERE chef_id = %s
         """,(id,)
         )

@@ -39,4 +39,23 @@ class ChefService:
         chefs = await self.chef_repository.get_all()
         return chefs
 
-    
+    async def add_chef(self,chef:Chef):
+        await self._verify_credentials(
+            chef_name = chef.chef_name,
+            email = chef.email
+        )
+        await self.chef_repository.add(
+            (
+                chef.chef_name,
+                chef.email,
+                self.hash(chef.password),
+                datetime.now(),
+                datetime.now()
+            )
+        )
+        chef = await self.chef_repository.get(
+            chef_name = chef.chef_name,
+            email = chef.email
+        )
+        return chef
+

@@ -10,7 +10,4 @@ def hello_world():
 
 app.include_router(chefs)
 
-if __name__ == "__main__":
-    import uvicorn 
-
-    uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)
+# uvicorn src.main:app --reload --host 0.0.0.0 

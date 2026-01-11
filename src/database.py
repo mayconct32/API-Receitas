@@ -4,7 +4,7 @@ from src.interfaces.connection_db import IConnectionDB
 from dotenv import load_dotenv
 
 
-load_dotenv()
+load_dotenv(override=True)
 
 class MysqlConnectionDB(IConnectionDB):
 

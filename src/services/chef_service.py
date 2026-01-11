@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from datetime import datetime
 from src.interfaces.repository import IRepository
 from pwdlib import PasswordHash
 from fastapi import HTTPException
@@ -48,9 +47,7 @@ class ChefService:
             (
                 chef.chef_name,
                 chef.email,
-                self.hash(chef.password),
-                datetime.now(),
-                datetime.now()
+                self.hash(chef.password)
             )
         )
         chef = await self.chef_repository.get(

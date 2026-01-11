@@ -50,11 +50,9 @@ class ChefRepository(IRepository[dict]):
             INSERT INTO chef(
                 chef_name,
                 email,
-                password_hash,
-                create_at,
-                updated_at
+                password_hash
             )
-            VALUES (%s,%s,%s,%s,%s);
+            VALUES (%s,%s,%s);
         """,data
         )
     

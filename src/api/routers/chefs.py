@@ -17,7 +17,8 @@ async def get_chefs(chef_service: ChefServiceDep):
 
 @app.post("/",status_code = HTTPStatus.CREATED)
 async def add_chefs(chef: Chef, chef_service: ChefServiceDep):
-    ...
+    chef = await chef_service.add_chef(chef)
+    return chef
 
 @app.delete("/",status_code = HTTPStatus.OK)
 def delete_chefs(posiçao: int, chef_service: ChefServiceDep):

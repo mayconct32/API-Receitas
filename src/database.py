@@ -36,6 +36,14 @@ class MysqlConnectionDB(IConnectionDB):
             if sql.split()[0] in ["UPDATE","INSERT"]:
                 await self.conn.commit()
             return response
+    
+    async def select_last_insert_id(self) -> int:
+        id = await self.execute(
+        """
+            SELECT LAST_INSERT_ID();
+        """  
+        )
+        return id
 
 
     

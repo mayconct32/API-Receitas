@@ -28,7 +28,7 @@ class ChefRepository(IRepository[dict]):
         chef_name: str = None,
         email: str = None
     )-> dict:
-        chef = await self.connection.execute(
+        chef_list = await self.connection.execute(
         """
             SELECT chef_id,
                 chef_name,
@@ -41,7 +41,8 @@ class ChefRepository(IRepository[dict]):
             email = %s
         """,(id,chef_name,email)
         )
-        return chef
+        for chef in chef_list:
+            return chef
     
     async def add(self, data: tuple) -> None:
         await self.connection.execute(

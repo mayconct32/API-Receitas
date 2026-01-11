@@ -17,6 +17,13 @@ class ChefService:
     def verify_password(self,password, hash) -> bool:
         return self.password_hash.verify(password, hash)
     
+    def check_authorization(self,chef_id,authenticated_chef_id):
+        if chef_id != authenticated_chef_id:
+            raise HTTPException(
+                status_code = HTTPStatus.UNAUTHORIZED,
+                detail = "unauthorized request"
+            )
+        
     async def _verify_credentials(self,chef_name:str,email:str):
         conflicting_chef = await self.chef_repository.get(
             chef_name = chef_name,

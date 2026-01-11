@@ -22,7 +22,12 @@ class ChefRepository(IRepository[dict]):
         )
         return chefs
 
-    async def get(self, id: int) -> dict:
+    async def get(
+        self, 
+        id: int = None,
+        chef_name: str = None,
+        email: str = None
+    )-> dict:
         chef = await self.connection.execute(
         """
             SELECT chef_id,
@@ -31,8 +36,10 @@ class ChefRepository(IRepository[dict]):
                 create_at,
                 updated_at
             FROM chef
-            WHERE chef_id = %s
-        """,(id,)
+            WHERE chef_id = %s or 
+            chef_name = %s or 
+            email = %s
+        """,(id,chef_name,email)
         )
         return chef
     

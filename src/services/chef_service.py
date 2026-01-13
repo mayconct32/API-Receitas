@@ -1,4 +1,6 @@
 from http import HTTPStatus
+from datetime import datetime,timezone,timedelta
+import os
 from src.interfaces.repository import IRepository
 from pwdlib import PasswordHash
 from src.models.chef import Chef
@@ -7,6 +9,7 @@ from fastapi.security import (
     OAuth2PasswordBearer
 )
 from fastapi import HTTPException
+import jwt
 
 
 class ChefSecurityService:
@@ -52,10 +55,21 @@ class ChefSecurityService:
                 detail = "Incorrect username or password!",
                 status_code = HTTPStatus.FORBIDDEN
             )
-    
-    
-
         
+    async def create_access_token(self,form_data:OAuth2PasswordRequestForm):
+        await self.check_authentication(form_data)
+        to_encode = {"sub":form_data.username}
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+        )
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(
+            to_encode,
+            os.getenv("SECRET_KEY"),
+            algorithm=os.getenv("ALGORITHM")
+        )
+        return encoded_jwt
+
 class ChefService:
 
     def __init__(

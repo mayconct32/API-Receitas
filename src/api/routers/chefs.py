@@ -1,4 +1,5 @@
 from fastapi import APIRouter,HTTPException,Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from http import HTTPStatus
 from typing import Annotated,List
@@ -15,16 +16,20 @@ app = APIRouter(tags=["chefs"],prefix="/chefs")
 async def get_chefs(chef_service: ChefServiceDep):
     return await chef_service.get_all_the_chefs()
 
-@app.post("/",status_code = HTTPStatus.CREATED)
+@app.post("/",status_code = HTTPStatus.CREATED,response_model = ResponseChef)
 async def add_chefs(chef: Chef, chef_service: ChefServiceDep):
     chef = await chef_service.add_chef(chef)
     return chef
 
+@app.post("/auth",status_code = HTTPStatus.CREATED)
+async def auth_chef(credentials: OAuth2PasswordRequestForm):
+    ...
+
 @app.delete("/",status_code = HTTPStatus.OK)
-def delete_chefs(posiçao: int, chef_service: ChefServiceDep):
+def delete_chefs(chef_id: int, chef_service: ChefServiceDep):
     ...
 
 @app.put("/",status_code = HTTPStatus.OK)
-def update_chefs(chef: Chef, posiçao: int, chef_service: ChefServiceDep):
+def update_chefs(chef: Chef, chef_id: int, chef_service: ChefServiceDep):
     ...
 

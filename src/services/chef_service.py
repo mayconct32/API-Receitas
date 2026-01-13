@@ -5,25 +5,18 @@ from fastapi import HTTPException
 from src.models.chef import Chef
 
 
-class ChefService:
+class ChefSecurityService:
 
     def __init__(self,chef_repository:IRepository) -> None:
-        self.password_hash = PasswordHash.recommended()
         self.chef_repository = chef_repository
-    
+        self.password_hash = PasswordHash.recommended()
+
     def hash(self,password: str) -> str:
         return self.password_hash.hash(password)
-
+    
     def verify_password(self,password, hash) -> bool:
         return self.password_hash.verify(password, hash)
     
-    def check_authorization(self,chef_id,authenticated_chef_id):
-        if chef_id != authenticated_chef_id:
-            raise HTTPException(
-                status_code = HTTPStatus.UNAUTHORIZED,
-                detail = "unauthorized request"
-            )
-        
     async def _verify_credentials(self,chef_name:str,email:str):
         conflicting_chef = await self.chef_repository.get(
             chef_name = chef_name,
@@ -41,12 +34,29 @@ class ChefService:
                     status_code = HTTPStatus.CONFLICT
                 )
     
+    def check_authorization(self,chef_id,authenticated_chef_id):
+        if chef_id != authenticated_chef_id:
+            raise HTTPException(
+                status_code = HTTPStatus.UNAUTHORIZED,
+                detail = "unauthorized request"
+            )
+        
+class ChefService:
+
+    def __init__(
+        self,
+        chef_repository:IRepository,
+        chef_sec_service:ChefSecurityService
+    ) -> None:
+        self.chef_repository = chef_repository
+        self.chef_sec_service = chef_sec_service
+    
     async def get_all_the_chefs(self):
         chefs = await self.chef_repository.get_all()
         return chefs
 
     async def add_chef(self,chef:Chef):
-        await self._verify_credentials(
+        await self.chef_sec_service._verify_credentials(
             chef_name = chef.chef_name,
             email = chef.email
         )
@@ -54,7 +64,7 @@ class ChefService:
             (
                 chef.chef_name,
                 chef.email,
-                self.hash(chef.password)
+                self.chef_sec_service.hash(chef.password)
             )
         )
         chef = await self.chef_repository.get(

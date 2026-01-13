@@ -47,7 +47,7 @@ class ChefSecurityService:
     
     async def check_authentication(self,form_data:OAuth2PasswordRequestForm):
         chef = await self.chef_repository.get(email=form_data.username)
-        if not chef or not self.verify_password(form_data.password,chef["password"]):
+        if not chef or not self.verify_password(form_data.password,chef["password_hash"]):
             raise HTTPException(
                 detail = "Incorrect username or password!",
                 status_code = HTTPStatus.FORBIDDEN

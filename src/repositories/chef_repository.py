@@ -33,6 +33,7 @@ class ChefRepository(IRepository[dict]):
             SELECT chef_id,
                 chef_name,
                 email,
+                password_hash,
                 create_at,
                 updated_at
             FROM chef

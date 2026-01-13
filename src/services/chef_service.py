@@ -1,8 +1,12 @@
 from http import HTTPStatus
 from src.interfaces.repository import IRepository
 from pwdlib import PasswordHash
-from fastapi import HTTPException
 from src.models.chef import Chef
+from fastapi.security import (
+    OAuth2PasswordRequestForm,
+    OAuth2PasswordBearer
+)
+from fastapi import HTTPException
 
 
 class ChefSecurityService:
@@ -40,6 +44,17 @@ class ChefSecurityService:
                 status_code = HTTPStatus.UNAUTHORIZED,
                 detail = "unauthorized request"
             )
+    
+    async def check_authentication(self,form_data:OAuth2PasswordRequestForm):
+        chef = await self.chef_repository.get(email=form_data.username)
+        if not chef or not self.verify_password(form_data.password,chef["password"]):
+            raise HTTPException(
+                detail = "Incorrect username or password!",
+                status_code = HTTPStatus.FORBIDDEN
+            )
+    
+    
+
         
 class ChefService:
 

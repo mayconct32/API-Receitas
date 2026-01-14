@@ -30,7 +30,7 @@ async def get_chefs(chef_service: ChefServiceDep):
     return await chef_service.get_all_the_chefs()
 
 @app.post("/",status_code = HTTPStatus.CREATED,response_model = ResponseChef)
-async def add_chefs(chef: Chef, chef_service: ChefServiceDep):
+async def add_chef(chef: Chef, chef_service: ChefServiceDep):
     chef = await chef_service.add_chef(chef)
     return chef
 
@@ -43,13 +43,17 @@ async def auth_chef(form_data: AuthRequestForm,chef_sec:ChefSecServiceDep):
     }
 
 @app.delete("/",status_code = HTTPStatus.OK)
-async def delete_chefs(chef_id: int, chef_service: ChefServiceDep, current_chef):
+async def delete_chef(chef_id: int, chef_service: ChefServiceDep, current_chef):
     response = await chef_service.delete_chef(
         chef_id,current_chef
     )
     return response
 
 @app.put("/",status_code = HTTPStatus.OK)
-def update_chefs(chef: Chef, chef_id: int, chef_service: ChefServiceDep):
-    ...
-
+async def update_chef(updated_chef: Chef, chef_id: int, chef_service: ChefServiceDep, current_chef):
+    chef_updated = await chef_service.update_chef(
+        updated_chef,
+        chef_id,
+        current_chef
+    )
+    return chef_updated

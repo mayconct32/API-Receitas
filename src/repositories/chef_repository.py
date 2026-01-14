@@ -71,6 +71,7 @@ class ChefRepository(IRepository[dict]):
                 chef_name = %s,
                 email = %s,
                 password_hash = %s
+                updated_at = %s
             WHERE chef_id = %s;
         """,data
         )

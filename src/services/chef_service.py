@@ -115,3 +115,26 @@ class ChefService:
             "message":"Chef successfully excluded"
         }
 
+    async def update_chef(self,updated_chef: Chef,chef_id,current_chef):
+        await self.chef_sec_service.check_authorization(
+            chef_id,
+            current_chef["chef_id"]
+        )
+        await self.chef_sec_service._verify_credentials(
+            updated_chef.chef_name,
+            updated_chef.email
+        )
+        await self.chef_repository.update(
+            (
+                updated_chef.chef_name,
+                updated_chef.email,
+                updated_chef.password,
+                datetime.now(),
+                current_chef["chef_id"]
+            )
+        )
+        updated_chef = await self.chef_repository.get(
+            chef_name = updated_chef.chef_name,
+            email = updated_chef.email
+        )
+        return updated_chef

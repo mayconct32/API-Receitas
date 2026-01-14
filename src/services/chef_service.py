@@ -6,7 +6,7 @@ from pwdlib import PasswordHash
 from src.models.chef import Chef
 from fastapi.security import (
     OAuth2PasswordRequestForm,
-    OAuth2PasswordBearer
+    OAuth2PasswordBearer,
 )
 from fastapi import HTTPException
 import jwt
@@ -17,6 +17,7 @@ class ChefSecurityService:
     def __init__(self,chef_repository:IRepository) -> None:
         self.chef_repository = chef_repository
         self.password_hash = PasswordHash.recommended()
+        self.oauth2_scheme = OAuth2PasswordBearer(tokenUrl="chefs/auth")
 
     def hash(self,password: str) -> str:
         return self.password_hash.hash(password)

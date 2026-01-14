@@ -43,8 +43,11 @@ async def auth_chef(form_data: AuthRequestForm,chef_sec:ChefSecServiceDep):
     }
 
 @app.delete("/",status_code = HTTPStatus.OK)
-def delete_chefs(chef_id: int, chef_service: ChefServiceDep):
-    ...
+async def delete_chefs(chef_id: int, chef_service: ChefServiceDep, current_chef):
+    response = await chef_service.delete_chef(
+        chef_id,current_chef
+    )
+    return response
 
 @app.put("/",status_code = HTTPStatus.OK)
 def update_chefs(chef: Chef, chef_id: int, chef_service: ChefServiceDep):

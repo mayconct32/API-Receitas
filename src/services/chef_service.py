@@ -103,3 +103,15 @@ class ChefService:
         )
         return chef
 
+    async def delete_chef(self,chef_id,current_chef):
+        await self.chef_sec_service.check_authorization(
+            chef_id,
+            current_chef["chef_id"]
+        )
+        await self.chef_repository.delete(
+            current_chef["chef_id"]
+        )
+        return {
+            "message":"Chef successfully excluded"
+        }
+

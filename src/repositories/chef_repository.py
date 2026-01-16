@@ -1,16 +1,15 @@
-from src.interfaces.repository import IRepository
-from src.interfaces.connection_db import IConnectionDB
 from typing import List
+from src.interfaces.connection_db import IConnectionDB
+from src.interfaces.repository import IRepository
 
 
 class ChefRepository(IRepository[dict]):
-
-    def __init__(self,connection:IConnectionDB) -> None:
+    def __init__(self, connection: IConnectionDB) -> None:
         self.connection = connection
 
     async def get_all(self) -> List[dict]:
         chefs = await self.connection.execute(
-        """
+            """
             SELECT chef_id,
                 chef_name,
                 email,
@@ -23,13 +22,10 @@ class ChefRepository(IRepository[dict]):
         return chefs
 
     async def get(
-        self, 
-        id: int = None,
-        chef_name: str = None,
-        email: str = None
-    )-> dict:
+        self, id: int = None, chef_name: str = None, email: str = None
+    ) -> dict:
         chef_list = await self.connection.execute(
-        """
+            """
             SELECT chef_id,
                 chef_name,
                 email,
@@ -40,41 +36,42 @@ class ChefRepository(IRepository[dict]):
             WHERE chef_id = %s or 
             chef_name = %s or 
             email = %s
-        """,(id,chef_name,email)
+        """,
+            (id, chef_name, email),
         )
         for chef in chef_list:
             return chef
-    
+
     async def add(self, data: tuple) -> None:
         await self.connection.execute(
-        """
+            """
             INSERT INTO chef(
                 chef_name,
                 email,
                 password_hash
             )
             VALUES (%s,%s,%s);
-        """,data
+        """,
+            data,
         )
-    
+
     async def delete(self, id: int) -> None:
         await self.connection.execute(
-        """
+            """
             DELETE FROM chef WHERE chef_id = %s;
-        """,(id,)
+        """,
+            (id,),
         )
-    
+
     async def update(self, data: tuple) -> None:
         await self.connection.execute(
-        """
+            """
             UPDATE chef SET
                 chef_name = %s,
                 email = %s,
                 password_hash = %s
                 updated_at = %s
             WHERE chef_id = %s;
-        """,data
+        """,
+            data,
         )
-    
-
-            

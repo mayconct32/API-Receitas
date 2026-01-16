@@ -1,13 +1,15 @@
 import os
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
-from jwt import InvalidTokenError,decode,encode
+
 from fastapi import HTTPException
 from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
 )
+from jwt import encode
 from pwdlib import PasswordHash
+
 from src.interfaces.repository import IRepository
 from src.models.chef import Chef, ResponseChef
 
@@ -81,12 +83,12 @@ class ChefService:
         self.chef_repository = chef_repository
         self.chef_sec_service = chef_sec_service
 
-    async def get_all_the_chefs(self):
-        chefs = await self.chef_repository.get_all()
+    async def get_all_the_chefs(self, offset, limit):
+        chefs = await self.chef_repository.get_all(offset, limit)
         return chefs
-    
+
     async def get_chef(self, id: int):
-        chef = await self.chef_repository.get(id = id)
+        chef = await self.chef_repository.get(id=id)
         return chef
 
     async def add_chef(self, chef: Chef):

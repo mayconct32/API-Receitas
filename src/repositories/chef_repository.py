@@ -1,4 +1,5 @@
 from typing import List
+
 from src.interfaces.connection_db import IConnectionDB
 from src.interfaces.repository import IRepository
 
@@ -7,7 +8,7 @@ class ChefRepository(IRepository[dict]):
     def __init__(self, connection: IConnectionDB) -> None:
         self.connection = connection
 
-    async def get_all(self) -> List[dict]:
+    async def get_all(self, offset: int, limit: int) -> List[dict]:
         chefs = await self.connection.execute(
             """
             SELECT chef_id,
@@ -16,8 +17,10 @@ class ChefRepository(IRepository[dict]):
                 create_at,
                 updated_at
             FROM chef
-            LIMIT 20;
-        """
+            LIMIT %s
+            OFFSET %s;
+        """,
+            (limit, offset),
         )
         return chefs
 

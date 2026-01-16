@@ -1,12 +1,13 @@
 from http import HTTPStatus
 from typing import Annotated, List
+
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+
 from src.api.routers.dependencies import get_chef_sec_service, get_chef_service
 from src.models.auth import Token
 from src.models.chef import Chef, ResponseChef
 from src.services.chef_service import ChefSecurityService, ChefService
-
 
 ChefServiceDep = Annotated[ChefService, Depends(get_chef_service)]
 
@@ -20,12 +21,14 @@ app = APIRouter(tags=["chefs"], prefix="/chefs")
 
 
 @app.get("/", status_code=HTTPStatus.OK, response_model=List[ResponseChef])
-async def get_chefs(chef_service: ChefServiceDep):
-    return await chef_service.get_all_the_chefs()
+async def get_chefs(offset: int, limit: int, chef_service: ChefServiceDep):
+    return await chef_service.get_all_the_chefs(offset=offset, limit=limit)
 
 
-@app.get("/{chef_id}", status_code=HTTPStatus.OK, response_model=ResponseChef|None)
-async def get_chef(chef_id: int,chef_service: ChefServiceDep):
+@app.get(
+    "/{chef_id}", status_code=HTTPStatus.OK, response_model=ResponseChef | None
+)
+async def get_chef(chef_id: int, chef_service: ChefServiceDep):
     return await chef_service.get_chef(chef_id)
 
 

@@ -24,6 +24,11 @@ async def get_chefs(chef_service: ChefServiceDep):
     return await chef_service.get_all_the_chefs()
 
 
+@app.get("/{chef_id}", status_code=HTTPStatus.OK, response_model=ResponseChef|None)
+async def get_chef(chef_id: int,chef_service: ChefServiceDep):
+    return await chef_service.get_chef(chef_id)
+
+
 @app.post("/", status_code=HTTPStatus.CREATED, response_model=ResponseChef)
 async def add_chef(chef: Chef, chef_service: ChefServiceDep):
     chef = await chef_service.add_chef(chef)
@@ -36,7 +41,7 @@ async def auth_chef(form_data: AuthRequestForm, chef_sec: ChefSecServiceDep):
     return {"access_token": token, "token_type": "bearer"}
 
 
-@app.delete("/", status_code=HTTPStatus.OK)
+@app.delete("/{chef_id}", status_code=HTTPStatus.OK)
 async def delete_chef(
     chef_id: int, chef_service: ChefServiceDep, current_chef
 ):
@@ -44,7 +49,7 @@ async def delete_chef(
     return response
 
 
-@app.put("/", status_code=HTTPStatus.OK, response_model=ResponseChef)
+@app.put("/{chef_id}", status_code=HTTPStatus.OK, response_model=ResponseChef)
 async def update_chef(
     updated_chef: Chef,
     chef_id: int,

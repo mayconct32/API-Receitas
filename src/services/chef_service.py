@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
-import jwt
+from jwt import InvalidTokenError,decode,encode
 from fastapi import HTTPException
 from fastapi.security import (
     OAuth2PasswordBearer,
@@ -64,7 +64,7 @@ class ChefSecurityService:
             minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
         )
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(
+        encoded_jwt = encode(
             to_encode,
             os.getenv("SECRET_KEY"),
             algorithm=os.getenv("ALGORITHM"),
@@ -84,6 +84,10 @@ class ChefService:
     async def get_all_the_chefs(self):
         chefs = await self.chef_repository.get_all()
         return chefs
+    
+    async def get_chef(self, id: int):
+        chef = await self.chef_repository.get(id = id)
+        return chef
 
     async def add_chef(self, chef: Chef):
         await self.chef_sec_service._verify_credentials(
@@ -118,7 +122,7 @@ class ChefService:
         await self.chef_repository.update((
             updated_chef.chef_name,
             updated_chef.email,
-            updated_chef.password,
+            self.chef_sec_service.hash(updated_chef.password),
             datetime.now(),
             current_chef["chef_id"],
         ))

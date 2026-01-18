@@ -72,8 +72,8 @@ class ChefRepository(IRepository[dict]):
             UPDATE chef SET
                 chef_name = %s,
                 email = %s,
+                updated_at = %s,
                 password_hash = %s
-                updated_at = %s
             WHERE chef_id = %s;
         """,
             data,

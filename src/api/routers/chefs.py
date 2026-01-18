@@ -1,12 +1,11 @@
 from http import HTTPStatus
 from typing import Annotated, List
-
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-
 from src.dependencies import ChefDependencies
 from src.models.auth import Token
 from src.models.chef import Chef, ResponseChef
+from src.services.auth_service import AuthService
 from src.services.chef_service import ChefService
 
 
@@ -14,9 +13,11 @@ ChefServiceDep = Annotated[
     ChefService, Depends(ChefDependencies.get_chef_service)
 ]
 
-CurrentChef= Annotated[
-    dict, Depends(ChefDependencies.get_auth_service)
+AuthServiceDep = Annotated[
+    AuthService, Depends(ChefDependencies.get_auth_service)
 ]
+
+CurrentChef = Annotated[dict, Depends(ChefDependencies.get_current_chef)]
 
 AuthRequestForm = Annotated[OAuth2PasswordRequestForm, Depends()]
 
@@ -49,8 +50,8 @@ async def add_chef(chef: Chef, chef_service: ChefServiceDep):
 
 
 @app.post("/auth", status_code=HTTPStatus.CREATED, response_model=Token)
-async def auth_chef(form_data: AuthRequestForm, chef_service: ChefServiceDep):
-    token = await chef_service.create_access_token(form_data)
+async def auth_chef(form_data: AuthRequestForm, auth_service: AuthServiceDep):
+    token = await auth_service.create_access_token(form_data)
     return {"access_token": token, "token_type": "bearer"}
 
 

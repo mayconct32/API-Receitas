@@ -1,12 +1,8 @@
-import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from http import HTTPStatus
-
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from jwt import InvalidTokenError, decode, encode
 from pwdlib import PasswordHash
-
 from src.interfaces.repository import IRepository
 from src.models.chef import Chef, ResponseChef
 
@@ -53,48 +49,13 @@ class ChefService:
                     status_code=HTTPStatus.CONFLICT,
                 )
 
-    def check_authorization(self, chef_id, authenticated_chef_id):
+    @staticmethod
+    def check_authorization(chef_id, authenticated_chef_id):
         if chef_id != authenticated_chef_id:
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
                 detail="unauthorized request",
             )
-
-    async def create_access_token(self, form_data: OAuth2PasswordRequestForm):
-        await self.check_authentication(form_data)
-        to_encode = {"sub": form_data.username}
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
-        )
-        to_encode.update({"exp": expire})
-        encoded_jwt = encode(
-            to_encode,
-            os.getenv("SECRET_KEY"),
-            algorithm=os.getenv("ALGORITHM"),
-        )
-        return encoded_jwt
-
-    async def get_current_user(self, token: str) -> dict:
-        credentials_exception = HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-        try:
-            payload: dict = decode(
-                token,
-                os.getenv("SECRET_KEY"),
-                algorithms=[os.getenv("ALGORITHM")],
-            )
-            email = payload.get("sub")
-            if email is None:
-                raise credentials_exception
-        except InvalidTokenError:
-            raise credentials_exception
-        chef = await self.chef_repository.get(email=email)
-        if chef is None:
-            raise credentials_exception
-        return chef
 
     async def get_all_the_chefs(self, offset, limit):
         chefs = await self.chef_repository.get_all(offset, limit)

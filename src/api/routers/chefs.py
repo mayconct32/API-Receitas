@@ -23,6 +23,11 @@ AuthRequestForm = Annotated[OAuth2PasswordRequestForm, Depends()]
 app = APIRouter(tags=["chefs"], prefix="/chefs")
 
 
+@app.get("/me", status_code=HTTPStatus.OK, response_model=ResponseChef)
+async def get_myself(current_chef: CurrentChef):
+    return current_chef
+
+
 @app.get("/", status_code=HTTPStatus.OK, response_model=List[ResponseChef])
 async def get_chefs(offset: int, limit: int, chef_service: ChefServiceDep):
     return await chef_service.get_all_the_chefs(offset=offset, limit=limit)

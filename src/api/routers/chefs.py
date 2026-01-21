@@ -2,22 +2,22 @@ from http import HTTPStatus
 from typing import Annotated, List
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from src.dependencies import ChefDependencies
 from src.models.auth import Token
 from src.models.chef import Chef, ResponseChef
 from src.services.auth_service import AuthService
 from src.services.chef_service import ChefService
+from src.dependencies import get_chef_service, get_auth_service, get_current_chef
 
 
 ChefServiceDep = Annotated[
-    ChefService, Depends(ChefDependencies.get_chef_service)
+    ChefService, Depends(get_chef_service)
 ]
 
 AuthServiceDep = Annotated[
-    AuthService, Depends(ChefDependencies.get_auth_service)
+    AuthService, Depends(get_auth_service)
 ]
 
-CurrentChef = Annotated[dict, Depends(ChefDependencies.get_current_chef)]
+CurrentChef = Annotated[dict, Depends(get_current_chef)]
 
 AuthRequestForm = Annotated[OAuth2PasswordRequestForm, Depends()]
 

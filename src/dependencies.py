@@ -4,23 +4,25 @@ from src.database import MysqlConnectionDB
 from src.repositories.chef_repository import ChefRepository
 from src.services.auth_service import AuthService
 from src.services.chef_service import ChefService
+from src.interfaces.connection_db import IConnectionDB
+from src.interfaces.repository import IRepository
 
 
-class ChefDependencies:
-    _chef_repository = ChefRepository(MysqlConnectionDB())
-    chef_service = ChefService(_chef_repository)
-    auth_service = AuthService(_chef_repository)
+def get_db_connection() -> IConnectionDB:
+    return MysqlConnectionDB()
 
-    @classmethod
-    def get_chef_service(cls) -> ChefService:
-        return cls.chef_service
+def get_repository(connection: IConnectionDB = Depends(get_db_connection)) -> IRepository:
+    return ChefRepository(connection)
 
-    @classmethod
-    async def get_current_chef(
-        cls, token: str = Depends(OAuth2PasswordBearer(tokenUrl="chefs/auth"))
-    ) -> dict:
-        return await cls.auth_service.decode_token(token)
+def get_chef_service(repository: IRepository = Depends(get_repository)) -> ChefService:
+    return ChefService(repository)
 
-    @classmethod
-    async def get_auth_service(cls):
-        return cls.auth_service
+def get_auth_service(repository: IRepository = Depends(get_repository)) -> AuthService:
+    return AuthService(repository)
+
+async def get_current_chef(
+    token: str = Depends(OAuth2PasswordBearer(tokenUrl="chefs/auth")),
+    auth_service: AuthService = Depends(get_auth_service)
+) -> dict:
+    return await auth_service.decode_token(token)
+

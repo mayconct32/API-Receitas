@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from src.api.routers.chefs import app as chefs
 
+from src.api.routers.chefs import app as chefs
 
 app = FastAPI()
 

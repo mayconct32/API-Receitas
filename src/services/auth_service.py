@@ -1,14 +1,16 @@
 import os
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
+
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt import InvalidTokenError, decode, encode
-from src.interfaces.repository import IRepository
+
+from src.interfaces.repository import IChefrepository
 
 
 class AuthService:
-    def __init__(self, chef_repository: IRepository):
+    def __init__(self, chef_repository: IChefrepository) -> None:
         self.chef_repository = chef_repository
 
     @staticmethod
@@ -42,7 +44,7 @@ class AuthService:
                 raise credentials_exception
         except InvalidTokenError:
             raise credentials_exception
-        chef = await self.chef_repository.get(email=email)
-        if chef is None:
+        chef = await self.chef_repository.get_by_email(email=email)
+        if not chef:
             raise credentials_exception
         return chef

@@ -1,14 +1,17 @@
+from datetime import datetime
 from typing import List
 
-from src.interfaces.connection_db import IConnectionDB
-from src.interfaces.repository import IRepository
+from src.interfaces.connection_db import ISqlDBConnection
+from src.interfaces.repository import IChefrepository
+from src.models.chef import Chef
+from src.utils import hash
 
 
-class ChefRepository(IRepository[dict]):
-    def __init__(self, connection: IConnectionDB) -> None:
+class ChefRepository(IChefrepository):
+    def __init__(self, connection: ISqlDBConnection) -> None:
         self.connection = connection
 
-    async def get_all(self, offset: int, limit: int) -> List[dict]:
+    async def get_all(self, offset: int, limit: int) -> List[Chef]:
         chefs = await self.connection.execute(
             """
             SELECT chef_id,
@@ -24,9 +27,7 @@ class ChefRepository(IRepository[dict]):
         )
         return chefs
 
-    async def get(
-        self, id: int = None, chef_name: str = None, email: str = None
-    ) -> dict:
+    async def get(self, id: int) -> Chef:
         chef_list = await self.connection.execute(
             """
             SELECT chef_id,
@@ -36,16 +37,48 @@ class ChefRepository(IRepository[dict]):
                 create_at,
                 updated_at
             FROM chef
-            WHERE chef_id = %s or 
-            chef_name = %s or 
-            email = %s
+            WHERE chef_id = %s;
         """,
-            (id, chef_name, email),
+            (id,),
         )
         for chef in chef_list:
             return chef
 
-    async def add(self, data: tuple) -> None:
+    async def get_by_email(self, email: str) -> Chef:
+        chef_list = await self.connection.execute(
+            """
+            SELECT chef_id,
+                chef_name,
+                email,
+                password_hash,
+                create_at,
+                updated_at
+            FROM chef
+            WHERE email = %s;
+        """,
+            (email,),
+        )
+        for chef in chef_list:
+            return chef
+
+    async def get_by_chef_name(self, chef_name: str) -> Chef:
+        chef_list = await self.connection.execute(
+            """
+            SELECT chef_id,
+                chef_name,
+                email,
+                password_hash,
+                create_at,
+                updated_at
+            FROM chef
+            WHERE chef_name = %s;
+        """,
+            (chef_name,),
+        )
+        for chef in chef_list:
+            return chef
+
+    async def add(self, data: Chef) -> None:
         await self.connection.execute(
             """
             INSERT INTO chef(
@@ -55,7 +88,11 @@ class ChefRepository(IRepository[dict]):
             )
             VALUES (%s,%s,%s);
         """,
-            data,
+            (
+                data.chef_name,
+                data.email,
+                hash(data.password),
+            ),
         )
 
     async def delete(self, id: int) -> None:
@@ -66,7 +103,7 @@ class ChefRepository(IRepository[dict]):
             (id,),
         )
 
-    async def update(self, data: tuple) -> None:
+    async def update(self, id: int, data: Chef) -> None:
         await self.connection.execute(
             """
             UPDATE chef SET
@@ -76,5 +113,11 @@ class ChefRepository(IRepository[dict]):
                 password_hash = %s
             WHERE chef_id = %s;
         """,
-            data,
+            (
+                data.chef_name,
+                data.email,
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                hash(data.password),
+                id,
+            ),
         )

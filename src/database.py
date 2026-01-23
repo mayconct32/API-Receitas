@@ -1,13 +1,14 @@
 import os
+
 from dotenv import load_dotenv
 from mysql.connector.aio import connect
-from src.interfaces.connection_db import IConnectionDB
 
+from src.interfaces.connection_db import ISqlDBConnection
 
 load_dotenv(override=True)
 
 
-class MysqlConnectionDB(IConnectionDB):
+class MysqlDBConnection(ISqlDBConnection):
     def __init__(self):
         self._host = os.getenv("HOST")
         self._user = os.getenv("USER")

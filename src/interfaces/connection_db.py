@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
 
-class IConnectionDB(ABC):
+class ISqlDBConnection(ABC):
     @abstractmethod
     def _connection(self):
         raise NotImplementedError
 
     @abstractmethod
-    def execute(self, **kwargs: object):
+    def execute(self, sql: str, data=None):
         raise NotImplementedError

@@ -1,0 +1,19 @@
+class RecipeRepository:
+
+    def __init__(self):
+        ...
+    
+    def get_all(self, offset: int, limit: int):
+        ...
+
+    def get(self, id: int):
+        ...
+
+    def add(self, data):
+        ...
+
+    def delete(self, id: int):
+        ...
+
+    def update(self, id: int, data):
+        ...

@@ -2,12 +2,12 @@ from datetime import datetime
 from typing import List
 
 from src.interfaces.connection_db import ISqlDBConnection
-from src.interfaces.repository import IChefrepository
+from src.interfaces.repository import IChefRepository
 from src.models.chef import Chef
 from src.utils import hash
 
 
-class ChefRepository(IChefrepository):
+class ChefRepository(IChefRepository):
     def __init__(self, connection: ISqlDBConnection) -> None:
         self.connection = connection
 

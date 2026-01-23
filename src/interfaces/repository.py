@@ -26,7 +26,7 @@ class IRepository[T](ABC):
         raise NotImplementedError
 
 
-class IChefrepository(IRepository[Chef]):
+class IChefRepository(IRepository[Chef]):
     @abstractmethod
     async def get_by_chef_name(self, chef_name: str) -> Chef:
         raise NotImplementedError

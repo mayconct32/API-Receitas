@@ -1,20 +1,20 @@
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
-from src.database import MysqlConnectionDB
-from src.interfaces.connection_db import IConnectionDB
+from src.database import MysqlDBConnection
+from src.interfaces.connection_db import ISqlDBConnection
 from src.interfaces.repository import IRepository
 from src.repositories.chef_repository import ChefRepository
 from src.services.auth_service import AuthService
 from src.services.chef_service import ChefService
 
 
-def get_db_connection() -> IConnectionDB:
-    return MysqlConnectionDB()
+def get_db_connection() -> ISqlDBConnection:
+    return MysqlDBConnection()
 
 
 def get_repository(
-    connection: IConnectionDB = Depends(get_db_connection),
+    connection: ISqlDBConnection = Depends(get_db_connection),
 ) -> IRepository:
     return ChefRepository(connection)
 

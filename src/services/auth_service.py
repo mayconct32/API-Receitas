@@ -6,11 +6,11 @@ from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt import InvalidTokenError, decode, encode
 
-from src.interfaces.repository import IChefrepository
+from src.interfaces.repository import IChefRepository
 
 
 class AuthService:
-    def __init__(self, chef_repository: IChefrepository) -> None:
+    def __init__(self, chef_repository: IChefRepository) -> None:
         self.chef_repository = chef_repository
 
     @staticmethod

@@ -3,13 +3,13 @@ from http import HTTPStatus
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from src.interfaces.repository import IChefrepository
+from src.interfaces.repository import IChefRepository
 from src.models.chef import Chef, ResponseChef
 from src.utils import verify_password
 
 
 class ChefService:
-    def __init__(self, chef_repository: IChefrepository) -> None:
+    def __init__(self, chef_repository: IChefRepository) -> None:
         self.chef_repository = chef_repository
 
     async def check_authentication(

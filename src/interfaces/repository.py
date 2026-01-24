@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from src.models.chef import Chef
+from src.models.recipe import Recipe
 
 
 class IRepository[T](ABC):
@@ -34,3 +35,6 @@ class IChefRepository(IRepository[Chef]):
     @abstractmethod
     async def get_by_email(self, email: str) -> Chef:
         raise NotImplementedError
+    
+class IRecipeRepository(IRepository[Recipe]):
+    pass

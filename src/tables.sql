@@ -15,7 +15,7 @@ CREATE TABLE recipe (
     prep_time time,
     posted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    image_url CHAR(130),
+    image_url CHAR(130) DEFAULT NULL,
     FOREIGN KEY(chef_id)
     REFERENCES chef(chef_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

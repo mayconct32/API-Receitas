@@ -1,5 +1,7 @@
+from typing import Annotated
+
 from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 
 from src.database import MysqlDBConnection
 from src.interfaces.connection_db import ISqlDBConnection
@@ -36,3 +38,12 @@ async def get_current_chef(
     auth_service: AuthService = Depends(get_auth_service),
 ) -> dict:
     return await auth_service.decode_token(token)
+
+
+ChefServiceDep = Annotated[ChefService, Depends(get_chef_service)]
+
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
+
+CurrentChef = Annotated[dict, Depends(get_current_chef)]
+
+AuthRequestForm = Annotated[OAuth2PasswordRequestForm, Depends()]

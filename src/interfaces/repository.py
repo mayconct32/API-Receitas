@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from src.models.chef import Chef
-from src.models.recipe import Recipe
+from src.models.recipe import ChefRecipe,RecipeInstruction,RecipeIngredient
 
 
 class IRepository[T](ABC):
@@ -36,5 +36,16 @@ class IChefRepository(IRepository[Chef]):
     async def get_by_email(self, email: str) -> Chef:
         raise NotImplementedError
     
-class IRecipeRepository(IRepository[Recipe]):
-    pass
+
+class IRecipeRepository(IRepository[ChefRecipe]):
+    @abstractmethod
+    async def add_recipe_instruction(self, data: RecipeInstruction) -> None:
+        raise NotImplementedError
+    
+    @abstractmethod
+    async def add_recipe_ingredient(self, data: RecipeIngredient) -> None:
+        raise NotImplementedError
+    
+    @abstractmethod
+    async def select_last_insert_id(self):
+        raise NotImplementedError

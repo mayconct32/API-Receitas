@@ -1,12 +1,13 @@
 import os
-
 from dotenv import load_dotenv
 from mysql.connector.aio import connect
+from src.interfaces.connection_db import ISqlDBConnection,INoSqlDBConnection
 
-from src.interfaces.connection_db import ISqlDBConnection
+from pymongo import AsyncMongoClient
+from pymongo.asynchronous.database import AsyncDatabase
+
 
 load_dotenv(override=True)
-
 
 class MysqlDBConnection(ISqlDBConnection):
     def __init__(self):
@@ -33,3 +34,26 @@ class MysqlDBConnection(ISqlDBConnection):
             if sql.split(maxsplit=1)[0] in ["UPDATE", "INSERT"]:
                 await self.conn.commit()
             return response
+
+
+class MongoDBConnection(INoSqlDBConnection):
+    def __init__(self) -> None:
+        self.__connection_string = "mongodb://{}:{}@{}:{}/?authSource=admin".format(
+            os.getenv("USERNAME_MONGO"),
+            os.getenv("PASSWORD_MONGO"),
+            os.getenv("HOST"),
+            os.getenv("PORT_MONGO")
+        )
+        self.__database_name = os.getenv("DATABASE_MONGO")
+        self.__client = None
+        self.__db_connection = None
+
+    def connection_to_db(self) -> None:
+        self.__client = AsyncMongoClient(self.__connection_string)
+        self.__db_connection = self.__client[self.__database_name]
+    
+    def get_db_connection(self) -> AsyncDatabase:
+        if not self.__db_connection:
+            self.connection_to_db()
+        return self.__db_connection
+

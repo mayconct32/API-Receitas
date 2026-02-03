@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 
-from src.database import MysqlDBConnection
-from src.interfaces.connection_db import ISqlDBConnection
+from src.database import MysqlDBConnection,MongoDBConnection
+from src.interfaces.connection_db import INoSqlDBConnection,ISqlDBConnection
 from src.interfaces.repository import IRepository
 from src.repositories.chef_repository import ChefRepository
 from src.repositories.recipe_repository import RecipeRepository
@@ -13,12 +13,15 @@ from src.services.chef_service import ChefService
 from src.services.recipe_service import RecipeService
 
 
-def get_db_connection() -> ISqlDBConnection:
+def get_mysql_connection() -> ISqlDBConnection:
     return MysqlDBConnection()
 
+def get_mongodb_connection() -> INoSqlDBConnection:
+    return MongoDBConnection()
 
+#Chef Dependecies
 def get_chef_repository(
-    connection: ISqlDBConnection = Depends(get_db_connection),
+    connection: ISqlDBConnection = Depends(get_mysql_connection),
 ) -> IRepository:
     return ChefRepository(connection)
 
@@ -41,9 +44,9 @@ async def get_current_chef(
 ) -> dict:
     return await auth_service.decode_token(token)
 
-
+#Recipes Dependencies
 def get_recipe_repository(
-    connection: ISqlDBConnection = Depends(get_db_connection),
+    connection: INoSqlDBConnection = Depends(get_mongodb_connection),
 ) -> IRepository:
     return RecipeRepository(connection)
 

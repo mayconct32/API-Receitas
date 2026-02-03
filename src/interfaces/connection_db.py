@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pymongo.asynchronous.database import AsyncDatabase
 
 
 class ISqlDBConnection(ABC):
@@ -17,5 +18,5 @@ class INoSqlDBConnection(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def get_db_connection(self):
+    def get_db_connection(self) -> AsyncDatabase:
         raise NotImplementedError

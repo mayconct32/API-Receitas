@@ -7,35 +7,6 @@ app = APIRouter(tags=["recipes"],prefix="/recipes")
 
 
 @app.get("/")
-def get_recipes():
-    pass
+async def get_recipes(recipe_service: RecipeServiceDep,offset: int, limit: int):
+    return await recipe_service.get_recipes(offset,limit)
 
-
-@app.get("/my_recipes")
-def get_my_recipes():
-    pass
-
-
-@app.get("/{recipe_id}")
-def get_recipe():
-    pass
-
-
-@app.post("/")
-async def add_recipe(
-    recipe: CompleteRecipe,
-    current_chef: CurrentChef,
-    recipe_service: RecipeServiceDep
-):
-    await recipe_service.add_recipe(recipe,current_chef["chef_id"])
-    return "ok"
-
-
-@app.delete("/{recipe_id}")
-def delete_recipe():
-    pass
-
-
-@app.put("/{recipe_id}")
-def update_recipe():
-    pass

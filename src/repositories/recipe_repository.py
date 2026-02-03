@@ -42,6 +42,10 @@ class RecipeRepository(IRecipeRepository):
         result = await collection.insert_one(db_recipe)
         return result.inserted_id
 
+    async def delete(self, recipe_id: str):
+        collection = self.connection.get_collection(self.collection_name)
+        await collection.delete_one({"_id": ObjectId(recipe_id)})
+
 
 
 

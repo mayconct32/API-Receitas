@@ -2,6 +2,8 @@ from src.interfaces.repository import IRecipeRepository
 from bson.errors import InvalidId
 from src.models.recipe import Recipe, ResponseRecipe
 from datetime import datetime
+from fastapi import HTTPException
+from http import HTTPStatus
 
 
 class RecipeService:
@@ -41,5 +43,19 @@ class RecipeService:
             posted_at = datetime,
             updated_at = datetime
         )
+    
+    async def verify_authorization(self, current_chef_id: str, recipe_id: str):
+        recipe = await self.recipe_repository.get(recipe_id)
+        if recipe["chef_id"] != current_chef_id:
+            raise HTTPException(
+                detail="unauthorized request",
+                status_code=HTTPStatus.UNAUTHORIZED
+            )
+
+    async def delete_recipe(self, current_chef_id: str, recipe_id: str):
+        await self.verify_authorization(current_chef_id, recipe_id)
+        await self.recipe_repository.delete(recipe_id)
+        return {"message": "Recipe successfully excluded"}
+
 
 

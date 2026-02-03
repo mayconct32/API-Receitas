@@ -20,13 +20,23 @@ async def get_my_recipes(recipe_service: RecipeServiceDep, current_chef: Current
 async def get_recipe(recipe_service: RecipeServiceDep, recipe_id: str):
     return await recipe_service.get_recipe(recipe_id)
 
+
 @app.post("/")
 async def add_recipe(
     recipe: CompleteRecipe,
     current_chef: CurrentChef,
     recipe_service: RecipeServiceDep
 ):
-    db_recipe = await recipe_service.add_recipe(recipe, current_chef["chef_id"])
-    return db_recipe
+    return await recipe_service.add_recipe(recipe, current_chef["chef_id"])
 
 
+@app.delete("/{recipe_id}")
+async def delete_recipe(
+    recipe_service: RecipeServiceDep, 
+    current_chef: CurrentChef, 
+    recipe_id: str
+):
+    return await recipe_service.delete_recipe(
+        current_chef["chef_id"], 
+        recipe_id
+    )

@@ -56,6 +56,11 @@ class RecipeService:
         await self.verify_authorization(current_chef_id, recipe_id)
         await self.recipe_repository.delete(recipe_id)
         return {"message": "Recipe successfully excluded"}
+    
+    async def update_recipe(self, current_chef_id: str, recipe_id: str, recipe: Recipe):
+        await self.verify_authorization(current_chef_id, recipe_id)
+        await self.recipe_repository.update(recipe_id, recipe)
+        return {"message": "Recipe successfully updated"}
 
 
 

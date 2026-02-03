@@ -40,3 +40,20 @@ async def delete_recipe(
         current_chef["chef_id"], 
         recipe_id
     )
+
+
+@app.put("/{recipe_id}")
+async def update_recipe(
+    recipe_service: RecipeServiceDep, 
+    current_chef: CurrentChef, 
+    recipe_id: str, 
+    recipe: CompleteRecipe
+):
+    return await recipe_service.update_recipe(
+        current_chef["chef_id"], 
+        recipe_id, 
+        recipe
+    )
+
+
+    

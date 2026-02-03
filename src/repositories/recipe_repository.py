@@ -46,6 +46,9 @@ class RecipeRepository(IRecipeRepository):
         collection = self.connection.get_collection(self.collection_name)
         await collection.delete_one({"_id": ObjectId(recipe_id)})
 
+    async def update(self, recipe_id: str, recipe: Recipe):
+        collection = self.connection.get_collection(self.collection_name)
+        await collection.update_one({"_id": ObjectId(recipe_id)},{"$set": recipe.model_dump()})
 
 
 

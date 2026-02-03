@@ -21,4 +21,11 @@ class RecipeService:
             if recipe:
                 recipe["_id"] = str(recipe["_id"])
             return recipe
+    
+    async def get_my_recipes(self,current_chef_id: str, offset: int, limit: int):
+        recipes = await self.recipe_repository.get_recipes_from_chef(current_chef_id, offset, limit)
+        if recipes:
+            for c in recipes:
+                c["_id"] = str(c["_id"])
+        return recipes
 

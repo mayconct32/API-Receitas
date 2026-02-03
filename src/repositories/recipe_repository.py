@@ -23,6 +23,13 @@ class RecipeRepository(IRecipeRepository):
         collection = self.connection.get_collection(self.collection_name)
         recipe = await collection.find_one({"_id": ObjectId(id)})
         return recipe
+    
+    async def get_recipes_from_chef(self, current_chef_id: str, offset: int, limit: int):
+        collection = self.connection.get_collection(self.collection_name)
+        cursor = collection.find({"chef_id": current_chef_id}).limit(limit).skip(offset)
+        recipes = [recipe async for recipe in cursor]
+        return recipes
+
 
 
 

@@ -6,7 +6,7 @@ from src.models.recipe import (
     ResponseRecipe
 )
 from typing import List
-
+from bson import ObjectId
 
 class RecipeRepository(IRecipeRepository):
     def __init__(self,connection: INoSqlDBConnection) -> None:
@@ -18,5 +18,12 @@ class RecipeRepository(IRecipeRepository):
         cursor = collection.find().limit(limit).skip(offset)
         recipes = [recipe async for recipe in cursor]
         return recipes
+    
+    async def get(self, id: str):
+        collection = self.connection.get_collection(self.collection_name)
+        recipe = await collection.find_one({"_id": ObjectId(id)})
+        return recipe
+
+
 
     

@@ -1,5 +1,8 @@
 from src.interfaces.repository import IRecipeRepository
 from bson.errors import InvalidId
+from src.models.recipe import Recipe, ResponseRecipe
+from datetime import datetime
+
 
 class RecipeService:
     def __init__(self,recipe_repository: IRecipeRepository) -> None:
@@ -28,4 +31,15 @@ class RecipeService:
             for c in recipes:
                 c["_id"] = str(c["_id"])
         return recipes
+
+    async def add_recipe(self, recipe: Recipe, current_chef_id: str) -> ResponseRecipe:
+        iserted_id = await self.recipe_repository.add(recipe, current_chef_id)
+        return ResponseRecipe(
+            recipe_id = iserted_id,
+            chef_id = current_chef_id,
+            **recipe.model_dump(),
+            posted_at = datetime,
+            updated_at = datetime
+        )
+
 

@@ -5,7 +5,6 @@ from datetime import datetime
 from fastapi import HTTPException
 from http import HTTPStatus
 
-
 class RecipeService:
     def __init__(self,recipe_repository: IRecipeRepository) -> None:
         self.recipe_repository = recipe_repository
@@ -34,18 +33,23 @@ class RecipeService:
                 c["_id"] = str(c["_id"])
         return recipes
 
-    async def add_recipe(self, recipe: Recipe, current_chef_id: str) -> ResponseRecipe:
+    async def add_recipe(self, recipe: Recipe, current_chef_id: str):
         iserted_id = await self.recipe_repository.add(recipe, current_chef_id)
         return ResponseRecipe(
-            recipe_id = iserted_id,
-            chef_id = current_chef_id,
             **recipe.model_dump(),
-            posted_at = datetime,
-            updated_at = datetime
+            recipe_id = str(iserted_id),
+            chef_id = current_chef_id,
+            posted_at = datetime.now(),
+            updated_at = datetime.now()
         )
     
     async def verify_authorization(self, current_chef_id: str, recipe_id: str):
         recipe = await self.recipe_repository.get(recipe_id)
+        if not recipe:
+            raise HTTPException(
+                detail="recipe not found",
+                status_code=HTTPStatus.NOT_FOUND
+            )
         if recipe["chef_id"] != current_chef_id:
             raise HTTPException(
                 detail="unauthorized request",

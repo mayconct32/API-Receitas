@@ -1,4 +1,3 @@
-from src.database import MongoDBConnection
 from src.interfaces.connection_db import INoSqlDBConnection
 from src.interfaces.repository import IRecipeRepository
 from src.models.recipe import (
@@ -6,8 +5,8 @@ from src.models.recipe import (
     ResponseRecipe
 )
 from typing import List
-from bson import ObjectId
 from datetime import datetime
+from uuid import uuid4
 
 class RecipeRepository(IRecipeRepository):
     def __init__(self,connection: INoSqlDBConnection) -> None:
@@ -22,7 +21,7 @@ class RecipeRepository(IRecipeRepository):
     
     async def get(self, id: str):
         collection = self.connection.get_collection(self.collection_name)
-        recipe = await collection.find_one({"_id": ObjectId(id)})
+        recipe = await collection.find_one({"recipe_id": id})
         return recipe
     
     async def get_recipes_from_chef(self, current_chef_id: str, offset: int, limit: int):
@@ -33,22 +32,24 @@ class RecipeRepository(IRecipeRepository):
 
     async def add(self, recipe: Recipe, current_chef_id: str):
         collection = self.connection.get_collection(self.collection_name)
+        unique_id = uuid4()
         db_recipe = {
+            "recipe_id": str(unique_id),
             "chef_id": current_chef_id,
             **recipe.model_dump(),
-            "posted_at": datetime,
-            "updated_at": datetime
+            "posted_at": datetime.now(),
+            "updated_at": datetime.now()
         }
-        result = await collection.insert_one(db_recipe)
-        return result.inserted_id
+        await collection.insert_one(db_recipe)
+        return unique_id
 
     async def delete(self, recipe_id: str):
         collection = self.connection.get_collection(self.collection_name)
-        await collection.delete_one({"_id": ObjectId(recipe_id)})
+        await collection.delete_one({"recipe_id": recipe_id})
 
     async def update(self, recipe_id: str, recipe: Recipe):
         collection = self.connection.get_collection(self.collection_name)
-        await collection.update_one({"_id": ObjectId(recipe_id)},{"$set": recipe.model_dump()})
+        await collection.update_one({"recipe_id": recipe_id},{"$set": recipe.model_dump()})
 
 
 

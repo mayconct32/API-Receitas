@@ -21,8 +21,13 @@ class Recipe(BaseModel):
     ingredients: List[Ingredient]
 
 
-class ResponseRecipe(Recipe):
-    recipe_id: int
+class DBRecipe(BaseModel):
+    recipe_id: str
     chef_id: int
     posted_at: datetime
     updated_at: datetime
+
+
+class ResponseRecipe(Recipe,DBRecipe):
+    ...
+

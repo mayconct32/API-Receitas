@@ -10,7 +10,7 @@ class Chef(BaseModel):
 
 
 class ResponseChef(BaseModel):
-    chef_id: int
+    chef_id: str
     chef_name: str
     email: EmailStr
     create_at: datetime

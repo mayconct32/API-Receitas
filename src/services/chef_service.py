@@ -57,7 +57,7 @@ class ChefService:
         chefs = await self.chef_repository.get_all(offset, limit)
         return chefs
 
-    async def get_chef(self, id: int):
+    async def get_chef(self, id: str):
         chef = await self.chef_repository.get(id=id)
         return chef
 
@@ -82,7 +82,7 @@ class ChefService:
             updated_chef.chef_name, updated_chef.email
         )
         await self.chef_repository.update(
-            updated_chef, current_chef["chef_id"]
+            current_chef["chef_id"], updated_chef
         )
         updated_chef = await self.chef_repository.get_by_email(
             email=updated_chef.email

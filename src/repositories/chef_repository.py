@@ -5,7 +5,7 @@ from src.interfaces.connection_db import ISqlDBConnection
 from src.interfaces.repository import IChefRepository
 from src.models.chef import Chef
 from src.utils import hash
-
+from uuid import uuid4
 
 class ChefRepository(IChefRepository):
     def __init__(self, connection: ISqlDBConnection) -> None:
@@ -27,7 +27,7 @@ class ChefRepository(IChefRepository):
         )
         return chefs
 
-    async def get(self, id: int) -> Chef:
+    async def get(self, id: str) -> Chef:
         chef_list = await self.connection.execute(
             """
             SELECT chef_id,
@@ -82,20 +82,22 @@ class ChefRepository(IChefRepository):
         await self.connection.execute(
             """
             INSERT INTO chef(
+                chef_id,
                 chef_name,
                 email,
                 password_hash
             )
-            VALUES (%s,%s,%s);
+            VALUES (%s,%s,%s,%s);
         """,
             (
+                str(uuid4()),
                 data.chef_name,
                 data.email,
-                hash(data.password),
+                hash(data.password)
             ),
         )
 
-    async def delete(self, id: int) -> None:
+    async def delete(self, id: str) -> None:
         await self.connection.execute(
             """
             DELETE FROM chef WHERE chef_id = %s;
@@ -103,7 +105,7 @@ class ChefRepository(IChefRepository):
             (id,),
         )
 
-    async def update(self, id: int, data: Chef) -> None:
+    async def update(self, id: str, data: Chef) -> None:
         await self.connection.execute(
             """
             UPDATE chef SET

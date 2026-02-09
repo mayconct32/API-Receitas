@@ -1,0 +1,29 @@
+{
+    "recipe_id": "3h70114b-e11a-43a6-87f0-c7ce67de2b60",
+    "chef_id": 15,
+    "recipe_name": "string",
+    "description": "string",
+    "prep_time": "string",
+    "instructions": [
+        {
+            "step_number": 1,
+            "description": "string"
+        },
+        {
+            "step_number": 2,
+            "description": "string"
+        }
+    ],
+    "ingredients": [
+        {
+            "ingredient_name": "string",
+            "quantity": "string"
+        },
+        {
+            "ingredient_name": "string2",
+            "quantity": "string"
+        }
+    ],
+    "posted_at": "2000-02-03T22:19:17.748+00:00",
+    "updated_at": "2000-02-03T22:19:17.748+00:00"
+}

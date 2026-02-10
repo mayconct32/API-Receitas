@@ -1,18 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Request
 from src.models.recipe import Recipe,ResponseRecipe
 from src.dependencies import CurrentChef,RecipeServiceDep
+from src.rate_limiter import limiter
 from typing import List
+
 
 app = APIRouter(tags=["recipes"],prefix="/recipes")
 
 
 @app.get("/",response_model=List[ResponseRecipe])
-async def get_recipes(recipe_service: RecipeServiceDep, offset: int, limit: int):
+@limiter.limit("5/minute")
+async def get_recipes(request: Request, recipe_service: RecipeServiceDep, offset: int, limit: int):
     return await recipe_service.get_recipes(offset,limit)
 
 
 @app.get("/my_recipes",response_model=List[ResponseRecipe])
-async def get_my_recipes(recipe_service: RecipeServiceDep, current_chef: CurrentChef, offset: int, limit: int):
+@limiter.limit("5/minute")
+async def get_my_recipes(request: Request, recipe_service: RecipeServiceDep, current_chef: CurrentChef, offset: int, limit: int):
     return await recipe_service.get_my_recipes(
         current_chef["chef_id"], 
         offset, 
@@ -21,12 +25,15 @@ async def get_my_recipes(recipe_service: RecipeServiceDep, current_chef: Current
 
 
 @app.get("/{recipe_id}",response_model=ResponseRecipe)
-async def get_recipe(recipe_service: RecipeServiceDep, recipe_id: str):
+@limiter.limit("5/minute")
+async def get_recipe(request: Request, recipe_service: RecipeServiceDep, recipe_id: str):
     return await recipe_service.get_recipe(recipe_id)
 
 
 @app.post("/",response_model=ResponseRecipe)
+@limiter.limit("3/minute")
 async def add_recipe(
+    request: Request,
     recipe: Recipe,
     current_chef: CurrentChef,
     recipe_service: RecipeServiceDep
@@ -38,7 +45,9 @@ async def add_recipe(
 
 
 @app.delete("/{recipe_id}")
+@limiter.limit("3/minute")
 async def delete_recipe(
+    request: Request,
     recipe_service: RecipeServiceDep, 
     current_chef: CurrentChef, 
     recipe_id: str
@@ -50,7 +59,9 @@ async def delete_recipe(
 
 
 @app.put("/{recipe_id}")
+@limiter.limit("3/minute")
 async def update_recipe(
+    request: Request,
     recipe_service: RecipeServiceDep, 
     current_chef: CurrentChef, 
     recipe_id: str, 

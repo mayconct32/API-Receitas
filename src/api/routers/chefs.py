@@ -1,18 +1,17 @@
 from http import HTTPStatus
 from typing import List
 
-from fastapi import APIRouter,Request
+from fastapi import APIRouter, Request
 
 from src.dependencies import (
-    CurrentChef,
-    ChefServiceDep,
     AuthRequestForm,
-    AuthServiceDep
+    AuthServiceDep,
+    ChefServiceDep,
+    CurrentChef,
 )
 from src.models.auth import Token
 from src.models.chef import Chef, ResponseChef
 from src.rate_limiter import limiter
-
 
 app = APIRouter(tags=["chefs"], prefix="/chefs")
 
@@ -25,7 +24,9 @@ async def get_myself(request: Request, current_chef: CurrentChef):
 
 @app.get("/", status_code=HTTPStatus.OK, response_model=List[ResponseChef])
 @limiter.limit("5/minute")
-async def get_chefs(request: Request, offset: int, limit: int, chef_service: ChefServiceDep):
+async def get_chefs(
+    request: Request, offset: int, limit: int, chef_service: ChefServiceDep
+):
     return await chef_service.get_all_the_chefs(offset=offset, limit=limit)
 
 
@@ -35,20 +36,26 @@ async def get_chefs(request: Request, offset: int, limit: int, chef_service: Che
     response_model=ResponseChef | None,
 )
 @limiter.limit("5/minute")
-async def get_chef(request: Request, chef_id: str, chef_service: ChefServiceDep):
+async def get_chef(
+    request: Request, chef_id: str, chef_service: ChefServiceDep
+):
     return await chef_service.get_chef(chef_id)
 
 
 @app.post("/", status_code=HTTPStatus.CREATED, response_model=ResponseChef)
 @limiter.limit("3/minute")
-async def add_chef(request: Request, chef: Chef, chef_service: ChefServiceDep):
+async def add_chef(
+    request: Request, chef: Chef, chef_service: ChefServiceDep
+):
     chef = await chef_service.add_chef(chef)
     return chef
 
 
 @app.post("/auth", status_code=HTTPStatus.CREATED, response_model=Token)
 @limiter.limit("3/minute")
-async def auth_chef(request: Request, form_data: AuthRequestForm, auth_service: AuthServiceDep):
+async def auth_chef(
+    request: Request, form_data: AuthRequestForm, auth_service: AuthServiceDep
+):
     token = await auth_service.create_access_token(form_data)
     return {"access_token": token, "token_type": "bearer"}
 
@@ -56,7 +63,10 @@ async def auth_chef(request: Request, form_data: AuthRequestForm, auth_service: 
 @app.delete("/{chef_id}", status_code=HTTPStatus.OK)
 @limiter.limit("3/minute")
 async def delete_chef(
-    request: Request, chef_id: str, chef_service: ChefServiceDep, current_chef: CurrentChef
+    request: Request,
+    chef_id: str,
+    chef_service: ChefServiceDep,
+    current_chef: CurrentChef,
 ):
     response = await chef_service.delete_chef(chef_id, current_chef)
     return response

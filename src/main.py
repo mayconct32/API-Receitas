@@ -1,9 +1,8 @@
-from fastapi import FastAPI,Request
+from fastapi import FastAPI, Request
 
 from src.api.routers.chefs import app as chefs
 from src.api.routers.recipes import app as recipes
 from src.rate_limiter import limiter
-
 
 app = FastAPI()
 
@@ -12,6 +11,7 @@ app = FastAPI()
 @limiter.limit("6/minute")
 def hello_world(request: Request):
     return {"message": "hello world!"}
+
 
 app.include_router(chefs)
 app.include_router(recipes)

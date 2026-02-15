@@ -1,11 +1,12 @@
 from datetime import datetime
 from typing import List
+from uuid import uuid4
 
 from src.interfaces.connection_db import ISqlDBConnection
 from src.interfaces.repository import IChefRepository
 from src.models.chef import Chef
 from src.utils import hash
-from uuid import uuid4
+
 
 class ChefRepository(IChefRepository):
     def __init__(self, connection: ISqlDBConnection) -> None:
@@ -89,12 +90,7 @@ class ChefRepository(IChefRepository):
             )
             VALUES (%s,%s,%s,%s);
         """,
-            (
-                str(uuid4()),
-                data.chef_name,
-                data.email,
-                hash(data.password)
-            ),
+            (str(uuid4()), data.chef_name, data.email, hash(data.password)),
         )
 
     async def delete(self, id: str) -> None:

@@ -25,6 +25,26 @@ class RedisConnection:
         if not self.__connection:
             self.__connect()
         return self.__connection
+
+
+class RedisRepository:
+    def __init__(self, redis_conn: RedisConnection) -> None:
+        self.redis_conn = redis_conn.get_connection()
+
+    def insert(self, key: str, value: any) -> None:
+        if isinstance(value,list):
+            #insert json
+            self.redis_conn.set(key,json.dumps(value))
+        else:
+            self.redis_conn.set(key,value)
     
+    def get(self, key: str) -> List[dict] | str:
+        try:
+            return json.loads(self.redis_conn.get(key))
+        except json.decoder.JSONDecodeError:
+            return self.redis_conn.get(key).decode("utf-8")
+    
+    def delete(self, key: str) -> None:
+        self.redis_conn.delete(key)
 
 

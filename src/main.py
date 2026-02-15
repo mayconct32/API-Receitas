@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 
-from src.api.routers.chefs import app as chefs
-from src.api.routers.recipes import app as recipes
+from src.api.v1.routers.chefs import app as chefs
+from src.api.v1.routers.recipes import app as recipes
 from src.rate_limiter import limiter
 
 app = FastAPI()

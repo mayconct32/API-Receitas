@@ -13,7 +13,7 @@ from src.models.auth import Token
 from src.models.chef import Chef, ResponseChef
 from src.rate_limiter import limiter
 
-app = APIRouter(tags=["chefs"], prefix="/chefs")
+app = APIRouter(tags=["chefs"], prefix="v1/chefs")
 
 
 @app.get("/me", status_code=HTTPStatus.OK, response_model=ResponseChef)

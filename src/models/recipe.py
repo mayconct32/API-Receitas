@@ -24,7 +24,7 @@ class Recipe(BaseModel):
 
 class DBRecipe(BaseModel):
     recipe_id: str
-    chef_id: int
+    chef_id: str
     posted_at: datetime
     updated_at: datetime
 

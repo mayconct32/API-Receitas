@@ -1,7 +1,6 @@
 from datetime import datetime
 from http import HTTPStatus
 
-from bson.errors import InvalidId
 from fastapi import HTTPException
 
 from src.interfaces.repository import IRecipeRepository
@@ -14,30 +13,22 @@ class RecipeService:
 
     async def get_recipes(self, offset: int, limit: int):
         recipes = await self.recipe_repository.get_all(offset, limit)
-        if recipes:
-            for c in recipes:
-                c["_id"] = str(c["_id"])
         return recipes
 
     async def get_recipe(self, id: str):
-        try:
-            recipe = await self.recipe_repository.get(id)
-        except InvalidId:
-            return None
-        else:
-            if recipe:
-                recipe["_id"] = str(recipe["_id"])
-            return recipe
-
+        recipe = await self.recipe_repository.get(id)
+        if not recipe:
+            raise HTTPException(
+                detail="recipe not found", status_code=HTTPStatus.NOT_FOUND
+            )
+        return recipe
+            
     async def get_my_recipes(
         self, current_chef_id: str, offset: int, limit: int
     ):
         recipes = await self.recipe_repository.get_recipes_from_chef(
             current_chef_id, offset, limit
         )
-        if recipes:
-            for c in recipes:
-                c["_id"] = str(c["_id"])
         return recipes
 
     async def add_recipe(self, recipe: Recipe, current_chef_id: str):

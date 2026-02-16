@@ -13,10 +13,10 @@ from src.models.auth import Token
 from src.models.chef import Chef, ResponseChef
 from src.rate_limiter import limiter
 
-app = APIRouter(tags=["chefs"], prefix="v1/chefs")
+app = APIRouter(tags=["chefs"], prefix="/v1/chefs")
 
 
-@app.get("/me", status_code=HTTPStatus.OK, response_model=ResponseChef)
+@app.get("/me", status_code=HTTPStatus.OK,response_model=ResponseChef)
 @limiter.limit("5/minute")
 async def get_myself(request: Request, current_chef: CurrentChef):
     return current_chef

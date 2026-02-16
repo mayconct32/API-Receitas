@@ -6,11 +6,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from src.interfaces.repository import IChefRepository
 from src.models.chef import Chef, ResponseChef
 from src.utils import verify_password
+from src.repositories.redis_repository import RedisRepository
 
 
 class ChefService:
-    def __init__(self, chef_repository: IChefRepository) -> None:
+    def __init__(self, chef_repository: IChefRepository, redis_repository: RedisRepository) -> None:
         self.chef_repository = chef_repository
+        self.redis_repository = redis_repository
 
     async def check_authentication(
         self, form_data: OAuth2PasswordRequestForm
@@ -54,24 +56,36 @@ class ChefService:
             )
 
     async def get_all_the_chefs(self, offset, limit):
-        chefs = await self.chef_repository.get_all(offset, limit)
-        return chefs
+        cache = await self.redis_repository.get("chefs")
+        if cache:
+            return cache
+        else:
+            chefs = await self.chef_repository.get_all(offset, limit)
+            await self.redis_repository.insert("chefs",chefs)
+            return chefs
 
     async def get_chef(self, id: str):
-        chef = await self.chef_repository.get(id=id)
-        return chef
+        cache = await self.redis_repository.get(f"chef:{id}")
+        if cache:
+            return cache
+        else:
+            chef = await self.chef_repository.get(id=id)
+            await self.redis_repository.insert(f"chef:{id}",chef)
+            return chef
 
     async def add_chef(self, chef: Chef):
         await self._verify_credentials(
             chef_name=chef.chef_name, email=chef.email
         )
         await self.chef_repository.add(chef)
+        await self.redis_repository.delete("chefs")
         chef = await self.chef_repository.get_by_email(email=chef.email)
         return chef
 
     async def delete_chef(self, chef_id, current_chef):
         self.check_authorization(chef_id, current_chef["chef_id"])
         await self.chef_repository.delete(current_chef["chef_id"])
+        await self.redis_repository.delete(f"chef:{current_chef["chef_id"]}")
         return {"message": "Chef successfully excluded"}
 
     async def update_chef(
@@ -84,6 +98,7 @@ class ChefService:
         await self.chef_repository.update(
             current_chef["chef_id"], updated_chef
         )
+        await self.redis_repository.delete(f"chef:{current_chef["chef_id"]}")
         updated_chef = await self.chef_repository.get_by_email(
             email=updated_chef.email
         )

@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from mysql.connector.aio import connect
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.database import AsyncDatabase
+from redis import asyncio
 
 from src.interfaces.connection_db import INoSqlDBConnection, ISqlDBConnection
 
@@ -59,3 +60,23 @@ class MongoDBConnection(INoSqlDBConnection):
         if not self.__db_connection:
             self.connection_to_db()
         return self.__db_connection
+
+
+#In-memory database used for caching.
+class RedisConnection:
+    def __init__(self) -> None:
+        self.host = os.getenv("HOST")
+        self.port = os.getenv("REDIS_PORT")
+        self.db = os.getenv("REDIS_DB")
+        self.__connection = None
+    
+    def __connect(self) -> None:
+        self.__connection = asyncio.from_url(
+            f"redis://{self.host}:{self.port}",
+            decode_responses = True
+        )
+
+    def get_connection(self) -> asyncio.Redis:
+        if not self.__connection:
+            self.__connect()
+        return self.__connection

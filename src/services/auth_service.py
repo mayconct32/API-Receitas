@@ -7,11 +7,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from jwt import InvalidTokenError, decode, encode
 
 from src.interfaces.repository import IChefRepository
+from src.repositories.redis_repository import RedisRepository
 
 
 class AuthService:
-    def __init__(self, chef_repository: IChefRepository) -> None:
+    def __init__(self, chef_repository: IChefRepository, redis_repository: RedisRepository) -> None:
         self.chef_repository = chef_repository
+        self.redis_repository = redis_repository
 
     @staticmethod
     async def create_access_token(form_data: OAuth2PasswordRequestForm):
@@ -44,7 +46,12 @@ class AuthService:
                 raise credentials_exception
         except InvalidTokenError:
             raise credentials_exception
-        chef = await self.chef_repository.get_by_email(email=email)
-        if not chef:
-            raise credentials_exception
-        return chef
+        cache = await self.redis_repository.get(f"chef:{email}")
+        if cache:
+            return cache
+        else:
+            chef = await self.chef_repository.get_by_email(email=email)
+            if not chef:
+                raise credentials_exception
+            await self.redis_repository.insert(f"chef:{email}",chef)
+            return chef

@@ -56,12 +56,14 @@ class ChefService:
             )
 
     async def get_all_the_chefs(self, offset, limit):
-        cache = await self.redis_repository.get("chefs")
+        cache = await self.redis_repository.get(f"chefs:{offset}&{limit}")
         if cache:
             return cache
         else:
             chefs = await self.chef_repository.get_all(offset, limit)
-            await self.redis_repository.insert("chefs",chefs)
+            await self.redis_repository.insert(
+                f"chefs:{offset}&{limit}", chefs
+            )
             return chefs
 
     async def get_chef(self, id: str):
@@ -78,14 +80,16 @@ class ChefService:
             chef_name=chef.chef_name, email=chef.email
         )
         await self.chef_repository.add(chef)
-        await self.redis_repository.delete("chefs")
+        await self.redis_repository.delete("chefs:*")
         chef = await self.chef_repository.get_by_email(email=chef.email)
         return chef
 
     async def delete_chef(self, chef_id, current_chef):
         self.check_authorization(chef_id, current_chef["chef_id"])
         await self.chef_repository.delete(current_chef["chef_id"])
-        await self.redis_repository.delete(f"chef:{current_chef["chef_id"]}")
+        await self.redis_repository.delete(
+            f"chef:{current_chef["chef_id"]}", "chefs:*"
+        )
         return {"message": "Chef successfully excluded"}
 
     async def update_chef(
@@ -98,7 +102,9 @@ class ChefService:
         await self.chef_repository.update(
             current_chef["chef_id"], updated_chef
         )
-        await self.redis_repository.delete(f"chef:{current_chef["chef_id"]}")
+        await self.redis_repository.delete(
+            f"chef:{current_chef["chef_id"]}","chefs:*"
+        )
         updated_chef = await self.chef_repository.get_by_email(
             email=updated_chef.email
         )

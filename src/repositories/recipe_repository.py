@@ -47,7 +47,7 @@ class RecipeRepository(IRecipeRepository):
             "updated_at": datetime.now(),
         }
         await collection.insert_one(db_recipe)
-        return unique_id
+        return db_recipe
 
     async def delete(self, recipe_id: str):
         collection = self.connection.get_collection(self.collection_name)

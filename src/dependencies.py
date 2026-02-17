@@ -30,7 +30,7 @@ def get_mongodb_connection() -> INoSqlDBConnection:
 
 # Chef Dependecies
 def get_chef_repository(
-    connection: ISqlDBConnection = Depends(get_mysql_connection),
+    connection: ISqlDBConnection = Depends(get_mysql_connection)
 ) -> IChefRepository:
     return ChefRepository(connection)
 
@@ -65,8 +65,9 @@ def get_recipe_repository(
 
 def get_recipe_service(
     repository: IRecipeRepository = Depends(get_recipe_repository),
+    redis_repository: RedisRepository = Depends(get_redis_repository)
 ) -> RecipeService:
-    return RecipeService(repository) 
+    return RecipeService(repository,redis_repository) 
 
 
 

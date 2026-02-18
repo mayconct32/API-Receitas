@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import List
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 
 from src.dependencies import (
     AuthRequestForm,
@@ -12,6 +12,8 @@ from src.dependencies import (
 from src.models.auth import Token
 from src.models.chef import Chef, ResponseChef
 from src.rate_limiter import limiter
+from src.exceptions.chef_exceptions import *
+
 
 app = APIRouter(tags=["chefs"], prefix="/v1/chefs")
 
@@ -27,7 +29,16 @@ async def get_myself(request: Request, current_chef: CurrentChef):
 async def get_chefs(
     request: Request, offset: int, limit: int, chef_service: ChefServiceDep
 ):
-    return await chef_service.get_all_the_chefs(offset=offset, limit=limit)
+    try:
+        return await chef_service.get_all_the_chefs(
+            offset=offset, 
+            limit=limit
+        )
+    except ChefErrorNotFound as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e)
+        )
 
 
 @app.get(
@@ -39,7 +50,13 @@ async def get_chefs(
 async def get_chef(
     request: Request, chef_id: str, chef_service: ChefServiceDep
 ):
-    return await chef_service.get_chef(chef_id)
+    try:
+        return await chef_service.get_chef(chef_id)
+    except ChefErrorNotFound as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e)
+        )
 
 
 @app.post("/", status_code=HTTPStatus.CREATED, response_model=ResponseChef)
@@ -47,8 +64,18 @@ async def get_chef(
 async def add_chef(
     request: Request, chef: Chef, chef_service: ChefServiceDep
 ):
-    chef = await chef_service.add_chef(chef)
-    return chef
+    try:
+        return await chef_service.add_chef(chef)
+    except ConflictingNameError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail=str(e)
+        )
+    except ConflictingEmailError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail=str(e)
+        )
 
 
 @app.post("/auth", status_code=HTTPStatus.CREATED, response_model=Token)
@@ -56,8 +83,15 @@ async def add_chef(
 async def auth_chef(
     request: Request, form_data: AuthRequestForm, auth_service: AuthServiceDep
 ):
-    token = await auth_service.create_access_token(form_data)
-    return {"access_token": token, "token_type": "bearer"}
+    try:
+        token = await auth_service.create_access_token(form_data)
+        return {"access_token": token, "token_type": "bearer"}
+    except CredentialsError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail=str(e),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @app.delete("/{chef_id}", status_code=HTTPStatus.OK)
@@ -68,8 +102,13 @@ async def delete_chef(
     chef_service: ChefServiceDep,
     current_chef: CurrentChef,
 ):
-    response = await chef_service.delete_chef(chef_id, current_chef)
-    return response
+    try:
+        return await chef_service.delete_chef(chef_id, current_chef)
+    except AuthorizationError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail=str(e)
+        )
 
 
 @app.put("/{chef_id}", status_code=HTTPStatus.OK, response_model=ResponseChef)
@@ -81,7 +120,22 @@ async def update_chef(
     chef_service: ChefServiceDep,
     current_chef: CurrentChef,
 ):
-    chef_updated = await chef_service.update_chef(
-        updated_chef, chef_id, current_chef
-    )
-    return chef_updated
+    try:
+        return await chef_service.update_chef(
+            updated_chef, chef_id, current_chef
+        )
+    except AuthorizationError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail=str(e)
+        )
+    except ConflictingNameError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail=str(e)
+        )
+    except ConflictingEmailError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail=str(e)
+        )

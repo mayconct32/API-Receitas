@@ -1,12 +1,9 @@
-from http import HTTPStatus
-
-from fastapi import HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
-
 from src.interfaces.repository import IChefRepository
 from src.models.chef import Chef, ResponseChef
+from src.models.auth import FormData
 from src.utils import verify_password
 from src.repositories.redis_repository import RedisRepository
+from src.exceptions.chef_exceptions import *
 
 
 class ChefService:
@@ -15,7 +12,7 @@ class ChefService:
         self.redis_repository = redis_repository
 
     async def check_authentication(
-        self, form_data: OAuth2PasswordRequestForm
+        self, form_data: FormData
     ):
         chef = await self.chef_repository.get_by_email(
             email=form_data.username
@@ -23,57 +20,63 @@ class ChefService:
         if not chef or not verify_password(
             form_data.password, chef["password_hash"]
         ):
-            raise HTTPException(
-                detail="Incorrect username or password!",
-                status_code=HTTPStatus.FORBIDDEN,
-            )
+            # raise HTTPException(
+            #     detail="Incorrect username or password!",
+            #     status_code=HTTPStatus.FORBIDDEN,
+            # )
+            raise AuthenticationError("Incorrect username or password!")
 
     async def _verify_credentials(self, chef_name: str, email: str):
         conflicting_name = await self.chef_repository.get_by_chef_name(
             chef_name=chef_name
         )
         if conflicting_name:
-            raise HTTPException(
-                detail="This name already exists!",
-                status_code=HTTPStatus.CONFLICT,
-            )
+            # raise HTTPException(
+            #     detail="This name already exists!",
+            #     status_code=HTTPStatus.CONFLICT,
+            # )
+            raise ConflictingNameError("This name already exists!")
         else:
             conflicting_email = await self.chef_repository.get_by_email(
                 email=email
             )
             if conflicting_email:
-                raise HTTPException(
-                    detail="This email already exists!",
-                    status_code=HTTPStatus.CONFLICT,
-                )
+                # raise HTTPException(
+                #     detail="This email already exists!",
+                #     status_code=HTTPStatus.CONFLICT,
+                # )
+                raise ConflictingEmailError("This email already exists!")
 
     @staticmethod
     def check_authorization(chef_id, authenticated_chef_id):
         if chef_id != authenticated_chef_id:
-            raise HTTPException(
-                status_code=HTTPStatus.UNAUTHORIZED,
-                detail="unauthorized request",
-            )
+            # raise HTTPException(
+            #     status_code=HTTPStatus.UNAUTHORIZED,
+            #     detail="unauthorized request",
+            # )
+            raise AuthorizationError("unauthorized request")
 
     async def get_all_the_chefs(self, offset, limit):
         cache = await self.redis_repository.get(f"chefs:{offset}&{limit}")
         if cache:
             return cache
-        else:
-            chefs = await self.chef_repository.get_all(offset, limit)
-            await self.redis_repository.insert(
-                f"chefs:{offset}&{limit}", chefs
-            )
-            return chefs
+        chefs = await self.chef_repository.get_all(offset, limit)
+        if not chefs:
+            raise ChefErrorNotFound("Chefs not found!")
+        await self.redis_repository.insert(
+            f"chefs:{offset}&{limit}", chefs
+        )
+        return chefs
 
     async def get_chef(self, id: str):
         cache = await self.redis_repository.get(f"chef:{id}")
         if cache:
             return cache
-        else:
-            chef = await self.chef_repository.get(id=id)
-            await self.redis_repository.insert(f"chef:{id}",chef)
-            return chef
+        chef = await self.chef_repository.get(id=id)
+        if not chef:
+            raise ChefErrorNotFound("Chef not found!")
+        await self.redis_repository.insert(f"chef:{id}",chef)
+        return chef
 
     async def add_chef(self, chef: Chef):
         await self._verify_credentials(
